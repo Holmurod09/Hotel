@@ -1,0 +1,382 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Aloqa - Menga Hotel{% endblock %}
+
+{% block content %}
+<section class="pt-32 pb-24 bg-gray-50 dark:bg-dark min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            
+            <!-- Chap tomon -->
+            <div>
+                <h1 class="font-serif text-4xl md:text-5xl font-bold mb-6">Biz bilan bog'laning</h1>
+                <p class="text-gray-600 dark:text-gray-400 mb-8 text-lg">
+                    Xona bron qilish yoki qo'shimcha ma'lumot olish uchun formani to'ldiring.
+                </p>
+                
+                {% if contact_info %}
+                <div class="space-y-6">
+                    <div class="flex items-start space-x-4 p-4 rounded-xl bg-white dark:bg-secondary shadow-sm">
+                        <div class="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-map-marker-alt text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-1 text-lg">Manzil</h4>
+                            <p class="text-gray-600 dark:text-gray-400">{{ contact_info.address }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-4 p-4 rounded-xl bg-white dark:bg-secondary shadow-sm">
+                        <div class="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-phone text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-1 text-lg">Telefon</h4>
+                            <p class="text-gray-600 dark:text-gray-400 text-lg">{{ contact_info.phone }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- O'ng tomon - Forma -->
+            <div class="bg-white dark:bg-secondary p-8 rounded-2xl shadow-xl">
+                <h2 class="text-2xl font-bold mb-6">Bron qilish</h2>
+                
+                {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                    <div class="{% if 'error' in message.tags %}bg-red-100 border-red-400 text-red-700{% else %}bg-green-100 border-green-400 text-green-700{% endif %} px-4 py-3 rounded-lg border">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <form method="post" action="{% url 'contact' %}" class="space-y-6" id="booking-form">
+                    {% csrf_token %}
+                    
+                    <!-- Ism va Familiya -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Ism <span class="text-red-500">*</span></label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.first_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Familiya <span class="text-red-500">*</span></label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.last_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Telefon - Davlat kod bilan -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            Telefon raqam <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex phone-wrapper">
+                            <!-- Davlat kodini tanlash -->
+                            <div class="country-code-wrapper relative">
+                                {{ form.country_code }}
+                                <!-- Bayroq ko'rsatish -->
+                                
+                            </div>
+                            <!-- Telefon raqami -->
+                            {{ form.phone }}
+                        </div>
+                        {% if form.phone.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.phone.errors.0 }}</p>
+                        {% endif %}
+                        <p class="text-gray-400 text-xs mt-1" id="phone-hint">O'zbekiston: 90 123 45 67</p>
+                    </div>
+
+                    <!-- Aloqa usuli -->
+                    <div>
+                        <label class="block text-sm font-medium mb-3">Aloqa usuli <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all contact-method-label {% if form.contact_method.value == 'whatsapp' or not form.contact_method.value %}border-primary bg-primary/5{% else %}border-gray-200 dark:border-gray-700{% endif %}">
+                                <input type="radio" name="contact_method" value="whatsapp" class="hidden"
+                                       {% if form.contact_method.value == 'whatsapp' or not form.contact_method.value %}checked{% endif %}>
+                                <i class="fab fa-whatsapp text-green-500 text-2xl mr-3"></i>
+                                <div>
+                                    <span class="font-medium block">WhatsApp</span>
+                                    <span class="text-xs text-gray-500">Tez javob</span>
+                                </div>
+                            </label>
+                            <label class="flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all contact-method-label {% if form.contact_method.value == 'telegram' %}border-primary bg-primary/5{% else %}border-gray-200 dark:border-gray-700{% endif %}">
+                                <input type="radio" name="contact_method" value="telegram" class="hidden"
+                                       {% if form.contact_method.value == 'telegram' %}checked{% endif %}>
+                                <i class="fab fa-telegram text-blue-500 text-2xl mr-3"></i>
+                                <div>
+                                    <span class="font-medium block">Telegram</span>
+                                    <span class="text-xs text-gray-500">Tez javob</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Xona tanlash -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Xona turi <span class="text-red-500">*</span></label>
+                        {{ form.room }}
+                        {% if form.room.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ form.room.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Sanalar -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Kelish sanasi</label>
+                            {{ form.check_in }}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Ketish sanasi</label>
+                            {{ form.check_out }}
+                        </div>
+                    </div>
+
+                    <!-- Xabar -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Qo'shimcha xabar</label>
+                        {{ form.message }}
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="w-full bg-primary text-white py-4 rounded-lg font-semibold text-lg hover:bg-yellow-600 transition-all flex items-center justify-center gap-2" id="submit-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        Yuborish
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Telefon input stili */
+select, input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.iti {
+  width: 100%;
+}
+
+.phone-wrapper {
+    display: flex;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.phone-wrapper select {
+  flex: 1;
+  min-width: 80px;
+}
+
+.phone-wrapper input {
+  flex: 3;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+    .phone-wrapper {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+
+.country-code-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    margin-right: 10px;
+    margin-top: 2px;
+    background: #1f2937;
+    border-color: #374151;
+
+}
+
+.country-code-wrapper select {
+    appearance: none;
+    padding-right: 2.5rem;
+    font-size: 0.875rem;
+    
+}
+
+@media (max-width: 480px) {
+    .country-code-wrapper {
+    flex-direction: column;
+  }
+}
+
+/* Select o'rniga custom dropdown */
+.custom-select {
+    position: relative;
+}
+
+.select-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 50;
+    display: none;
+}
+
+.select-options.active {
+    display: block;
+}
+
+.select-option {
+    padding: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+}
+
+.select-option:hover {
+    background: #f3f4f6;
+}
+
+/* Radio button custom stil */
+.contact-method-label:has(input:checked) {
+    border-color: #d4af37;
+    background: rgba(212, 175, 55, 0.05);
+}
+
+/* Dark mode */
+.dark .country-code-wrapper select {
+    background-color: #1f2937;
+    border-color: #374151;
+    color: white;
+}
+
+.dark .select-options {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+.dark .select-option:hover {
+    background: #374151;
+}
+
+
+
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 1. Formani va tugmani ID orqali ushlab olamiz
+const form = document.getElementById('booking-form');
+    const btn = document.getElementById('submit-btn');
+
+    // 2. Forma yuborilish (submit) hodisasini kuzatamiz
+    form.addEventListener('submit', function() {
+        // 3. Tugmani bloklaymiz
+        btn.disabled = true;
+        
+        // 4. Foydalanuvchiga jarayon ketayotganini bildiramiz
+        btn.innerText = "Yuborilmoqda, iltimos kuting...";
+        
+        // Bu joyda brauzer avtomatik ravishda formani serverga yuboradi
+    });
+// Davlat kodlari va bayroqlar
+const countryData = {
+    '+998': { flag: '🇺🇿', hint: 'O\'zbekiston: 90 123 45 67', pattern: '## ### ## ##' },
+    '+7': { flag: '🇷🇺', hint: 'Rossiya: 999 123 45 67', pattern: '### ### ## ##' },
+    '+1': { flag: '🇺🇸', hint: 'AQSh: 202 555 0123', pattern: '### ### ####' },
+    '+44': { flag: '🇬🇧', hint: 'Buyuk Britaniya: 7700 900123', pattern: '#### ######' },
+    '+49': { flag: '🇩🇪', hint: 'Germaniya: 1512 3456789', pattern: '#### ########' },
+    '+90': { flag: '🇹🇷', hint: 'Turkiya: 555 123 45 67', pattern: '### ### ## ##' },
+    '+86': { flag: '🇨🇳', hint: 'Xitoy: 138 1234 5678', pattern: '### #### ####' },
+    '+91': { flag: '🇮🇳', hint: 'Hindiston: 98765 43210', pattern: '##### #####' },
+    '+81': { flag: '🇯🇵', hint: 'Yaponiya: 90 1234 5678', pattern: '## #### ####' },
+    '+82': { flag: '🇰🇷', hint: 'Koreya: 10 1234 5678', pattern: '## #### ####' },
+    '+971': { flag: '🇦🇪', hint: 'BAA: 50 123 4567', pattern: '## ### ####' },
+    '+992': { flag: '🇹🇯', hint: 'Tojikiston: 90 123 45 67', pattern: '## ### ## ##' },
+    '+993': { flag: '🇹🇲', hint: 'Turkmaniston: 65 123456', pattern: '## ######' },
+    '+996': { flag: '🇰🇬', hint: 'Qirg\'iziston: 555 123 456', pattern: '### ### ###' },
+    '+994': { flag: '🇦🇿', hint: 'Ozarbayjon: 40 123 45 67', pattern: '## ### ## ##' },
+    '+375': { flag: '🇧🇾', hint: 'Belarus: 29 123 45 67', pattern: '## ### ## ##' },
+    '+380': { flag: '🇺🇦', hint: 'Ukraina: 67 123 45 67', pattern: '## ### ## ##' },
+    '+48': { flag: '🇵🇱', hint: 'Polsha: 512 345 678', pattern: '### ### ###' },
+    '+39': { flag: '🇮🇹', hint: 'Italiya: 312 345 6789', pattern: '### ### ####' },
+    '+33': { flag: '🇫🇷', hint: 'Fransiya: 6 12 34 56 78', pattern: '# ## ## ## ##' },
+    '+34': { flag: '🇪🇸', hint: 'Ispaniya: 612 34 56 78', pattern: '### ## ## ##' },
+};
+
+// Davlat kodi o'zgarganda
+document.querySelector('select[name="country_code"]').addEventListener('change', function() {
+    const code = this.value;
+    const data = countryData[code];
+    
+    if (data) {
+        // Bayroqni yangilash
+        document.getElementById('flag-display').textContent = data.flag;
+        // Hintni yangilash
+        document.getElementById('phone-hint').textContent = data.hint;
+        // Placeholder ni yangilash
+        document.querySelector('input[name="phone"]').placeholder = data.hint.split(': ')[1];
+    }
+});
+
+// Telefon formatlash
+document.querySelector('input[name="phone"]').addEventListener('input', function(e) {
+    const code = document.querySelector('select[name="country_code"]').value;
+    const pattern = countryData[code]?.pattern || '## ### ## ##';
+    
+    let value = e.target.value.replace(/\D/g, '');
+    let formatted = '';
+    let index = 0;
+    
+    for (let char of pattern) {
+        if (char === '#') {
+            if (index < value.length) {
+                formatted += value[index];
+                index++;
+            } else {
+                break;
+            }
+        } else {
+            if (index < value.length) {
+                formatted += char;
+            }
+        }
+    }
+    
+    e.target.value = formatted;
+});
+
+// Radio button stilini yangilash
+document.querySelectorAll('input[name="contact_method"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        document.querySelectorAll('.contact-method-label').forEach(label => {
+            label.classList.remove('border-primary', 'bg-primary/5');
+            label.classList.add('border-gray-200', 'dark:border-gray-700');
+        });
+        
+        if (this.checked) {
+            this.closest('.contact-method-label').classList.remove('border-gray-200', 'dark:border-gray-700');
+            this.closest('.contact-method-label').classList.add('border-primary', 'bg-primary/5');
+        }
+    });
+});
+</script>
+{% endblock %}

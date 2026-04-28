@@ -1,0 +1,78 @@
+{% load static %}
+<div class="icon-select-widget">
+    <select name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+        {% for group_name, group_choices, group_index in widget.optgroups %}
+            {% if group_name %}
+                <optgroup label="{{ group_name }}">
+            {% endif %}
+            {% for option in group_choices %}
+                <option value="{{ option.value }}" 
+                        data-icon="{{ option.value }}"
+                        {% if option.selected %}selected{% endif %}>
+                    {{ option.label }}
+                </option>
+            {% endfor %}
+            {% if group_name %}
+                </optgroup>
+            {% endif %}
+        {% endfor %}
+    </select>
+    
+    <div class="icon-preview-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 15px;">
+        {% for group_name, group_choices, group_index in widget.optgroups %}
+            {% for option in group_choices %}
+            <div class="icon-option {% if option.selected %}selected{% endif %}" 
+                 data-value="{{ option.value }}"
+                 style="padding: 10px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.2s;"
+                 onclick="selectIcon(this, '{{ option.value }}')">
+                <i class="{{ option.value }}" style="font-size: 24px; margin-bottom: 5px; display: block;"></i>
+                <small style="font-size: 10px; color: #666;">{{ option.label }}</small>
+            </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function selectIcon(element, value) {
+    // Barcha tanlanganlarni olib tashlash
+    document.querySelectorAll('.icon-option').forEach(el => {
+        el.style.borderColor = '#ddd';
+        el.style.backgroundColor = 'white';
+        el.classList.remove('selected');
+    });
+    
+    // Tanlanganini ajratish
+    element.style.borderColor = '#d4af37';
+    element.style.backgroundColor = '#fffbeb';
+    element.classList.add('selected');
+    
+    // Select qiymatini o'zgartirish
+    const select = element.closest('.icon-select-widget').querySelector('select');
+    select.value = value;
+    
+    // Change event'ini chaqirish
+    select.dispatchEvent(new Event('change'));
+}
+
+// Dastlabki tanlangan iconni ajratish
+document.addEventListener('DOMContentLoaded', function() {
+    const selected = document.querySelector('.icon-option.selected');
+    if (selected) {
+        selected.style.borderColor = '#d4af37';
+        selected.style.backgroundColor = '#fffbeb';
+    }
+});
+</script>
+
+<style>
+.icon-option:hover {
+    border-color: #d4af37 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.icon-option.selected {
+    border-color: #d4af37 !important;
+    background-color: #fffbeb !important;
+}
+</style>

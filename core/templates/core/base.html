@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Menga Hotel{% endblock %}</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#d4af37',
+                        secondary: '#1a1a2e',
+                        dark: '#0f0f1e',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="font-sans bg-gray-50 dark:bg-dark text-gray-900 dark:text-white transition-colors duration-300">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="{% url 'home' %}" class="flex items-center space-x-2">
+                    <i class="fas fa-hotel text-3xl text-primary"></i>
+                    <span class="font-serif text-2xl font-bold tracking-wider">MENGA</span>
+                </a>
+                
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="{% url 'home' %}" class="hover:text-primary transition-colors">Bosh sahifa</a>
+                    <a href="{% url 'rooms' %}" class="hover:text-primary transition-colors">Xonalar</a>
+                    <a href="{% url 'gallery' %}" class="hover:text-primary transition-colors">Galereya</a>
+                    <a href="{% url 'staff' %}" class="hover:text-primary transition-colors">Jamoa</a>
+                    <a href="{% url 'services' %}" class="hover:text-primary transition-colors">Xizmatlar</a>
+                    <a href="{% url 'contact' %}" class="hover:text-primary transition-colors">Aloqa</a>
+                    <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
+                    </button>
+                    <a href="{% url 'contact' %}" class="bg-primary text-white px-6 py-2 rounded-full hover:bg-yellow-600 transition-all transform hover:scale-105">
+                        Bron qilish
+                    </a>
+                </div>
+                
+                <button class="md:hidden text-2xl" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="mobile-menu" class="hidden md:hidden glass border-t border-gray-200 dark:border-gray-700">
+            <div class="px-4 pt-2 pb-6 space-y-2">
+                <a href="{% url 'home' %}" class="block py-2 hover:text-primary">Bosh sahifa</a>
+                <a href="{% url 'rooms' %}" class="block py-2 hover:text-primary">Xonalar</a>
+                <a href="{% url 'gallery' %}" class="block py-2 hover:text-primary">Galereya</a>
+                <a href="{% url 'staff' %}" class="block py-2 hover:text-primary">Jamoa</a>
+                <a href="{% url 'services' %}" class="block py-2 hover:text-primary">Xizmatlar</a>
+                <a href="{% url 'contact' %}" class="block py-2 hover:text-primary">Aloqa</a>
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+    <footer class="bg-secondary dark:bg-black py-12 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-hotel text-3xl text-primary"></i>
+                        <span class="font-serif text-2xl font-bold">MENGA HOTEL</span>
+                    </div>
+                    <p class="text-gray-400 mb-6 max-w-md">
+                        Premium klass mehmonxona. Sizning dam olishingiz uchun eng yaxshi tanlov.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Tez havolalar</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="{% url 'home' %}" class="hover:text-primary transition-colors">Bosh sahifa</a></li>
+                        <li><a href="{% url 'rooms' %}" class="hover:text-primary transition-colors">Xonalar</a></li>
+                        <li><a href="{% url 'gallery' %}" class="hover:text-primary transition-colors">Galereya</a></li>
+                        <li><a href="{% url 'contact' %}" class="hover:text-primary transition-colors">Aloqa</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Ish vaqti</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>24/7 Reception</li>
+                        <li>Restaurant: 06:00 - 23:00</li>
+                        <li>SPA: 09:00 - 21:00</li>
+                        <li>Fitness: 24/7</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-500">
+                <p>&copy; {% now "Y" %} Menga Hotel. Barcha huquqlar himoyalangan.</p>
+            </div>
+        </div>
+    </footer>
+
+    {% if messages %}
+    <div class="fixed bottom-4 right-4 z-[70] space-y-2">
+        {% for message in messages %}
+        <div class="bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 animate-slide-up">
+            <i class="fas fa-check-circle text-xl"></i>
+            <div>
+                <p class="font-semibold">{{ message }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,243 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Galereya - Menga Hotel{% endblock %}
+
+{% block content %}
+<section class="pt-32 pb-24 bg-white dark:bg-secondary">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h1 class="font-serif text-4xl md:text-5xl font-bold mb-4">Galereya</h1>
+            <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8">
+                Mehmonxonamizdan lavhalar, xonalar, restoran va tadbirlarimizdan fotosuratlar
+            </p>
+            
+            <!-- Filter Buttons -->
+            <div class="flex flex-wrap justify-center gap-3 mb-8" id="gallery-filters">
+                <button onclick="filterGallery('all')" 
+                        class="gallery-filter active px-6 py-2 rounded-full border-2 border-primary bg-primary text-white transition-all hover:shadow-lg transform hover:-translate-y-0.5" 
+                        data-filter="all">
+                    <i class="fas fa-th-large mr-2"></i>Barchasi
+                </button>
+                {% for key, value in categories.items %}
+                <button onclick="filterGallery('{{ key }}')" 
+                        class="gallery-filter px-6 py-2 rounded-full border-2 border-gray-300 dark:border-gray-600 hover:border-primary transition-all hover:shadow-lg transform hover:-translate-y-0.5" 
+                        data-filter="{{ key }}">
+                    {% if key == 'rooms' %}<i class="fas fa-bed mr-2"></i>
+                    {% elif key == 'restaurant' %}<i class="fas fa-utensils mr-2"></i>
+                    {% elif key == 'spa' %}<i class="fas fa-spa mr-2"></i>
+                    {% elif key == 'events' %}<i class="fas fa-calendar-alt mr-2"></i>
+                    {% else %}<i class="fas fa-image mr-2"></i>{% endif %}
+                    {{ value }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Gallery Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="gallery-grid">
+            {% for image in images %}
+            <div class="gallery-item group relative overflow-hidden rounded-xl cursor-pointer aspect-[4/3] bg-gray-100 dark:bg-gray-800" 
+                 data-category="{{ image.category }}"
+                 data-index="{{ forloop.counter0 }}"
+                 onclick="openLightbox({{ forloop.counter0 }})">
+                {% if image.image %}
+                <img src="{{ image.image.url }}" 
+                     alt="{{ image.title }}" 
+                     loading="lazy"
+                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                {% endif %}
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6">
+                    <div class="text-center text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                        <i class="fas fa-search-plus text-3xl mb-2"></i>
+                        <p class="font-semibold text-lg">{{ image.title }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-12 text-gray-500">
+                <i class="fas fa-images text-6xl mb-4"></i>
+                <p>Hali rasmlar qo'shilmagan</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Lightbox -->
+<div id="lightbox" class="fixed inset-0 z-[100] hidden bg-black/95 items-center justify-center opacity-0 transition-opacity duration-300" onclick="closeLightbox()">
+    <button class="absolute top-4 right-4 text-white text-3xl hover:text-primary transition-colors p-2" onclick="event.stopPropagation(); closeLightbox()">
+        <i class="fas fa-times"></i>
+    </button>
+    
+    <button class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white text-3xl hover:text-primary transition-colors p-4 hover:bg-white/10 rounded-full" 
+            onclick="event.stopPropagation(); changeImage(-1)">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    
+    <button class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white text-3xl hover:text-primary transition-colors p-4 hover:bg-white/10 rounded-full" 
+            onclick="event.stopPropagation(); changeImage(1)">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+    
+    <div class="relative max-w-[90%] max-h-[90%]" onclick="event.stopPropagation()">
+        <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl">
+        <div id="lightbox-caption" class="absolute -bottom-12 left-0 right-0 text-center text-white text-lg font-medium"></div>
+    </div>
+    
+    <!-- Image counter -->
+    <div id="lightbox-counter" class="absolute top-4 left-4 text-white bg-black/50 px-4 py-2 rounded-full text-sm"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Galereya ma'lumotlari
+const galleryImages = {{ gallery_json|safe }};
+
+let currentImageIndex = 0;
+let currentFilter = 'all';
+let visibleIndices = [];
+
+function updateVisibleIndices() {
+    visibleIndices = galleryImages.map((img, i) => {
+        const item = document.querySelectorAll('.gallery-item')[i];
+        if (!item) return -1;
+        return !item.classList.contains('hidden') ? i : -1;
+    }).filter(i => i !== -1);
+}
+
+function filterGallery(category) {
+    currentFilter = category;
+    
+    // Button styles
+    document.querySelectorAll('.gallery-filter').forEach(btn => {
+        if (btn.dataset.filter === category) {
+            btn.classList.add('bg-primary', 'text-white', 'border-primary');
+            btn.classList.remove('border-gray-300', 'dark:border-gray-600');
+        } else {
+            btn.classList.remove('bg-primary', 'text-white', 'border-primary');
+            btn.classList.add('border-gray-300', 'dark:border-gray-600');
+        }
+    });
+    
+    // Filter items with animation
+    const items = document.querySelectorAll('.gallery-item');
+    items.forEach((item, index) => {
+        const img = galleryImages[index];
+        const shouldShow = category === 'all' || img.category === category;
+        
+        if (shouldShow) {
+            item.classList.remove('hidden');
+            // Staggered animation
+            setTimeout(() => {
+                item.style.opacity = '1';
+                item.style.transform = 'scale(1)';
+            }, index * 50);
+        } else {
+            item.style.opacity = '0';
+            item.style.transform = 'scale(0.8)';
+            setTimeout(() => item.classList.add('hidden'), 300);
+        }
+    });
+    
+    updateVisibleIndices();
+}
+
+function openLightbox(index) {
+    updateVisibleIndices();
+    currentImageIndex = index;
+    updateLightbox();
+    
+    const lightbox = document.getElementById('lightbox');
+    lightbox.classList.remove('hidden');
+    // Trigger reflow
+    void lightbox.offsetWidth;
+    lightbox.classList.remove('opacity-0');
+    lightbox.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+    const lightbox = document.getElementById('lightbox');
+    lightbox.classList.add('opacity-0');
+    setTimeout(() => {
+        lightbox.classList.add('hidden');
+        lightbox.classList.remove('flex');
+        document.body.style.overflow = 'auto';
+    }, 300);
+}
+
+function changeImage(direction) {
+    if (visibleIndices.length === 0) return;
+    
+    const currentVisibleIndex = visibleIndices.indexOf(currentImageIndex);
+    let newVisibleIndex = currentVisibleIndex + direction;
+    
+    if (newVisibleIndex < 0) newVisibleIndex = visibleIndices.length - 1;
+    if (newVisibleIndex >= visibleIndices.length) newVisibleIndex = 0;
+    
+    currentImageIndex = visibleIndices[newVisibleIndex];
+    
+    // Smooth transition
+    const img = document.getElementById('lightbox-img');
+    img.style.opacity = '0.5';
+    setTimeout(() => {
+        updateLightbox();
+        img.style.opacity = '1';
+    }, 150);
+}
+
+function updateLightbox() {
+    const img = galleryImages[currentImageIndex];
+    const imgEl = document.getElementById('lightbox-img');
+    const caption = document.getElementById('lightbox-caption');
+    const counter = document.getElementById('lightbox-counter');
+    
+    imgEl.src = img.src;
+    imgEl.alt = img.title;
+    caption.textContent = img.title;
+    counter.textContent = `${visibleIndices.indexOf(currentImageIndex) + 1} / ${visibleIndices.length}`;
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+    const lightbox = document.getElementById('lightbox');
+    if (lightbox.classList.contains('hidden')) return;
+    
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') changeImage(-1);
+    if (e.key === 'ArrowRight') changeImage(1);
+});
+
+// Touch swipe support
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.getElementById('lightbox').addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+});
+
+document.getElementById('lightbox').addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+});
+
+function handleSwipe() {
+    const swipeThreshold = 50;
+    const diff = touchStartX - touchEndX;
+    
+    if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0) {
+            changeImage(1); // Swipe left - next
+        } else {
+            changeImage(-1); // Swipe right - previous
+        }
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    updateVisibleIndices();
+});
+</script>
+{% endblock %}

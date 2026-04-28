@@ -1,0 +1,206 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Xonalar - Menga Hotel{% endblock %}
+
+{% block content %}
+<section class="pt-32 pb-24 bg-gray-50 dark:bg-dark">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h1 class="font-serif text-4xl md:text-5xl font-bold mb-4">Bizning Xonalar</h1>
+            <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                Har bir xona o'ziga xos uslub va qulaylikka ega. Xonani tanlash uchun ustiga bosing.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="rooms-grid">
+            {% for room in rooms %}
+            <div class="room-card group relative overflow-hidden rounded-2xl cursor-pointer transform transition-all duration-300 hover:-translate-y-2 shadow-lg hover:shadow-2xl bg-white dark:bg-secondary"
+                 onclick="openModal({{ room.id }})"
+                 data-room-id="{{ room.id }}">
+                <div class="relative h-72 overflow-hidden">
+                    {% if room.image %}
+                    <img src="{{ room.image.url }}" alt="{{ room.title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    {% endif %}
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
+                    
+                    <div class="room-overlay absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300">
+                        <span class="bg-primary text-white px-6 py-3 rounded-full font-semibold transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                            Batafsil ko'rish
+                        </span>
+                    </div>
+                    
+                    <div class="absolute bottom-4 left-4 right-4">
+                        <h3 class="text-white text-xl font-bold mb-1">{{ room.title }}</h3>
+                        <p class="text-primary font-semibold">{{ room.price }} so'm / kechasi</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">{{ room.subtitle }}</p>
+                    <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                        <span><i class="fas fa-bed mr-2"></i>{{ room.bed_type }}</span>
+                        <span><i class="fas fa-ruler-combined mr-2"></i>{{ room.area }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Room Modal -->
+<div id="room-modal" class="fixed inset-0 z-[60] hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+        
+        <div class="relative inline-block align-bottom bg-white dark:bg-secondary rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full modal-enter">
+            <button onclick="closeModal()" class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2">
+                <div class="h-64 md:h-auto relative">
+                    <img id="modal-image" src="" alt="" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent md:hidden"></div>
+                </div>
+                
+                <div class="p-8 max-h-[80vh] overflow-y-auto">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 id="modal-title" class="text-3xl font-serif font-bold mb-2"></h3>
+                            <p id="modal-subtitle" class="text-primary font-semibold text-lg"></p>
+                        </div>
+                        <div class="text-right">
+                            <div id="modal-price" class="text-2xl font-bold text-primary"></div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">/ kechasi</div>
+                        </div>
+                    </div>
+                    
+                    <div id="modal-description" class="text-gray-600 dark:text-gray-300 mb-6 prose dark:prose-invert max-w-none"></div>
+                    
+                    <div class="mb-6">
+                        <h4 class="font-semibold mb-3 text-lg">Xona imkoniyatlari:</h4>
+                        <div id="modal-features" class="grid grid-cols-2 gap-3"></div>
+                    </div>
+                    
+                    <div class="flex space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <a href="{% url 'contact' %}" class="flex-1 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-yellow-600 transition-colors text-center flex items-center justify-center gap-2">
+                            <i class="fas fa-calendar-check"></i>
+                            Bron qilish
+                        </a>
+                        <button onclick="closeModal()" class="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            Yopish
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading spinner -->
+<div id="modal-loading" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/50">
+    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-primary"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Xonalar ma'lumotlari (serverdan keladi)
+const roomsData = {{ rooms_json|safe }};
+
+// Modal funksiyalari
+async function openModal(roomId) {
+    const loading = document.getElementById('modal-loading');
+    loading.classList.remove('hidden');
+    loading.classList.add('flex');
+    
+    try {
+        // API dan to'liq ma'lumot olish (agar kerak bo'lsa)
+        const response = await fetch(`/api/room/${roomId}/`);
+        let room;
+        
+        if (response.ok) {
+            room = await response.json();
+        } else {
+            // Local data dan olish
+            room = roomsData.find(r => r.id === roomId);
+        }
+        
+        if (!room) {
+            console.error('Xona topilmadi:', roomId);
+            return;
+        }
+        
+        // Modalni to'ldirish
+        document.getElementById('modal-image').src = room.image;
+        document.getElementById('modal-image').alt = room.title;
+        document.getElementById('modal-title').textContent = room.title;
+        document.getElementById('modal-subtitle').textContent = room.subtitle;
+        document.getElementById('modal-price').textContent = room.price + " so'm";
+        document.getElementById('modal-description').innerHTML = room.description;
+        
+        // Features
+        const featuresContainer = document.getElementById('modal-features');
+        featuresContainer.innerHTML = '';
+        
+        if (room.features && room.features.length > 0) {
+            room.features.forEach(feature => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg';
+                div.innerHTML = `<i class="fas fa-check text-primary mr-2"></i>${feature}`;
+                featuresContainer.appendChild(div);
+            });
+        }
+        
+        // Qo\'shimcha ma\'lumotlar
+        const extraInfo = document.createElement('div');
+        extraInfo.className = 'col-span-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700';
+        extraInfo.innerHTML = `
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div class="flex items-center text-gray-600 dark:text-gray-300">
+                    <i class="fas fa-ruler-combined text-primary mr-2"></i>
+                    Maydon: ${room.area || 'Kiritilmagan'}
+                </div>
+                <div class="flex items-center text-gray-600 dark:text-gray-300">
+                    <i class="fas fa-bed text-primary mr-2"></i>
+                    Krevat: ${room.bed_type || 'Kiritilmagan'}
+                </div>
+            </div>
+        `;
+        featuresContainer.appendChild(extraInfo);
+        
+        // Modalni ko'rsatish
+        document.getElementById('room-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        
+    } catch (error) {
+        console.error('Xatolik:', error);
+        alert('Ma\'lumot yuklashda xatolik yuz berdi');
+    } finally {
+        loading.classList.add('hidden');
+        loading.classList.remove('flex');
+    }
+}
+
+function closeModal() {
+    document.getElementById('room-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Keyboard events
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeModal();
+        closeLightbox(); // agar galereya ochiq bo'lsa
+    }
+});
+
+// Modal tashqarisiga bosganda yopish
+document.getElementById('room-modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget || e.target.classList.contains('fixed')) {
+        closeModal();
+    }
+});
+</script>
+{% endblock %}
